@@ -1,30 +1,27 @@
 
 #include "Globals.h"
 #include "Header.h"
-#pragma comment(lib,"gdiplus.lib")
 using namespace Gdiplus;
 //z racji ¿e tylko podpunkt 4 to niepotrzebne s¹ inne kszta³ty
 class element
 {
 public:
 	
-	element(HDC window,int x,int y, int mass, int typ,std::vector<std::pair<int, int>> position){
+	element(int x,int y, int mass, int typ,std::vector<std::pair<int, int>> &position){
 		xpos = x;
 		ypos = y;
 		weight = mass;
 		type = typ;
-		hdc = window;
 		position.push_back(std::make_pair(x, y));
 }
-	element(HDC window, int x, int y, int mass, std::vector<std::pair<int, int>> position) {
+	element(int x, int y, int mass, std::vector<std::pair<int, int>> &position) {
 		xpos = x;
 		ypos = y;
 		weight = mass;
 		type = 1;
-		hdc = window;
 		position.push_back(std::make_pair(x,y));
 	}
-	void changeposition(int dx, int dy, std::vector<std::pair<int, int>> position) {//ten vector to pierwsze co mi przysz³o do g³owy w celu sprawdzania czy coœ znajduje siê na drodze obiektu
+	void changeposition(int dx, int dy, std::vector<std::pair<int, int>> &position) {//ten vector to pierwsze co mi przysz³o do g³owy w celu sprawdzania czy coœ znajduje siê na drodze obiektu
 		bool obstacle = false;
 		if (!((xpos+dx-5)<0||(ypos+dx-5)<dividing_line_top||(xpos+dx+5)>window_size.right||(ypos+dx+5)>window_size.bottom)) {
 			if (type = 1) {
@@ -58,12 +55,12 @@ public:
 			return false;
 		else return true;
 	}
-	void draw()
+	void draw(HDC hdc)
 	{
 		if (type == 1)
-			draw_rect();
+			draw_rect(hdc);
 		else if (type == 2)
-			draw_triangle();
+			draw_triangle(hdc);
 		//else draw_circle();
 	}
 	int check_weight()
@@ -82,8 +79,7 @@ private:
 	int type; //obecnie raczej nieu¿ywane mo¿na przechowaæ kszta³t obiektu 1 = kwadrat i tak dalej, zawsze mo¿e siê przydaæ, po zmianie typ 1 element typ 2 hak
 	Color color{ 255,255,0,0 };
 	DashStyle dash_style = DashStyleSolid;
-	HDC hdc;
-	VOID draw_rect()
+	VOID draw_rect(HDC hdc)
 	{
 		Graphics graphics(hdc); //Klasa zawieraj¹ca metody do rysowania
 		Pen      pen(color, 3); //Klasa zwieraj¹ca atrybuty lini takie jak: Opacity, Red, Green, Blue
@@ -92,16 +88,14 @@ private:
 		graphics.DrawRectangle(&pen, (xpos - 5), (ypos - 5), 10, 10);
 		DeleteObject(&pen);
 	}
-	VOID draw_triangle()
+	VOID draw_triangle(HDC hdc)
 	{
 		Graphics graphics(hdc);
 		Pen      pen(color, 3);
-		Point p[3];
 		Point p1(xpos, ypos - 5) ;
 			Point p2(xpos - 5, ypos - 5) ;
 			Point p3(xpos + 5, ypos - 5) ;
-			Point temp[3] = { p1,p2,p3 };
-			Point* pointarray = temp;
+			Point pointarray[3] = { p1,p2,p3 };
 		pen.SetDashStyle(dash_style);
 		graphics.DrawPolygon(&pen, pointarray,3);
 		DeleteObject(&pen);
