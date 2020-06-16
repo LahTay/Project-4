@@ -7,7 +7,7 @@ class element
 {
 public:
 	
-	element(int x,int y, int mass, int typ,std::vector<std::pair<int, int>> &position){
+	element(int x,int y, int mass, int typ, std::vector<std::pair<int, int>> &position){
 		xpos = x;
 		ypos = y;
 		weight = mass;
@@ -18,15 +18,15 @@ public:
 		xpos = x;
 		ypos = y;
 		weight = mass;
-		type = 1;
-		position.push_back(std::make_pair(x,y));
+		type = SQUARE;
+		position.push_back(std::make_pair(x, y));
 	}
-	void changeposition(int dx, int dy, std::vector<std::pair<int, int>> &position) {//ten vector to pierwsze co mi przysz³o do g³owy w celu sprawdzania czy coœ znajduje siê na drodze obiektu
+	void change_position(int dx, int dy, std::vector<std::pair<int, int>> &position) {//ten vector to pierwsze co mi przysz³o do g³owy w celu sprawdzania czy coœ znajduje siê na drodze obiektu
 		bool obstacle = false;
-		if (!((xpos+dx-5)<0||(ypos+dx-5)<dividing_line_top||(xpos+dx+5)>window_size.right||(ypos+dx+5)>window_size.bottom)) {
-			if (type = 1) {
+		if (!((xpos+dx-CENTER_DISTANCE)<0||(ypos+dx-CENTER_DISTANCE)<dividing_line_top||(xpos+dx+CENTER_DISTANCE)>window_size.right||(ypos+dx+CENTER_DISTANCE)>window_size.bottom)) {
+			if (type == SQUARE) {
 				for (std::vector<std::pair<int, int>>::iterator i = position.begin(); i < position.end(); i++) {
-					if (!(((i->first > (xpos + dx + 5)) || (i->first < (xpos + dx - 5))) && ((i->second > (ypos + dy + 5)) || (i->second < (ypos + dy - 5)))))
+					if (!(((i->first > (xpos + dx + CENTER_DISTANCE)) || (i->first < (xpos + dx - CENTER_DISTANCE))) && ((i->second > (ypos + dy + CENTER_DISTANCE)) || (i->second < (ypos + dy - CENTER_DISTANCE)))))
 					{
 						if (i->first != xpos || i->second != ypos)
 						{
@@ -57,11 +57,22 @@ public:
 	}
 	void draw(HDC hdc)
 	{
-		if (type == 1)
+		switch (type) { //Zamiast wielu if else
+		case SQUARE:
 			draw_rect(hdc);
-		else if (type == 2)
+			break;
+		case TRIANGLE:
 			draw_triangle(hdc);
-		//else draw_circle();
+			break;
+		case CIRCLE:
+			break;
+		case HOOK:
+			draw_line(hdc);
+			draw_hook(hdc);
+			break;
+		default:
+			break;
+		}
 	}
 	int check_weight()
 	{
@@ -72,34 +83,64 @@ public:
 		Point temp(xpos, ypos);
 			return temp;
 	}
+
+	
 private:
 	int weight;
 	int xpos;
 	int ypos;
 	int type; //obecnie raczej nieu¿ywane mo¿na przechowaæ kszta³t obiektu 1 = kwadrat i tak dalej, zawsze mo¿e siê przydaæ, po zmianie typ 1 element typ 2 hak
+	Point starting_point = { xpos, ypos };
 	Color color{ 255,255,0,0 };
-	DashStyle dash_style = DashStyleSolid;
+	
 	VOID draw_rect(HDC hdc)
 	{
 		Graphics graphics(hdc); //Klasa zawieraj¹ca metody do rysowania
 		Pen      pen(color, 3); //Klasa zwieraj¹ca atrybuty lini takie jak: Opacity, Red, Green, Blue
 
-		pen.SetDashStyle(dash_style);
-		graphics.DrawRectangle(&pen, (xpos - 5), (ypos - 5), 10, 10);
+		pen.SetDashStyle(DashStyleSolid);
+		graphics.DrawRectangle(&pen, (xpos - CENTER_DISTANCE), (ypos - CENTER_DISTANCE), HOOK_SIZE, HOOK_SIZE);
 		DeleteObject(&pen);
 	}
 	VOID draw_triangle(HDC hdc)
 	{
 		Graphics graphics(hdc);
 		Pen      pen(color, 3);
-		Point p1(xpos, ypos - 5) ;
-			Point p2(xpos - 5, ypos - 5) ;
-			Point p3(xpos + 5, ypos - 5) ;
-			Point pointarray[3] = { p1,p2,p3 };
-		pen.SetDashStyle(dash_style);
+
+		Point p1(xpos, ypos - CENTER_DISTANCE) ;
+		Point p2(xpos - CENTER_DISTANCE, ypos - CENTER_DISTANCE) ;
+		Point p3(xpos + CENTER_DISTANCE, ypos - CENTER_DISTANCE) ;
+		Point pointarray[3] = { p1,p2,p3 };
+		
+		pen.SetDashStyle(DashStyleSolid);
 		graphics.DrawPolygon(&pen, pointarray,3);
 		DeleteObject(&pen);
 	}
+	VOID draw_line(HDC hdc) {
+		Graphics graphics(hdc);
+		Pen      pen(color, 3);
+
+		Point beggining(xpos, top_of_crane);
+		Point ending(xpos, ypos);
+
+		graphics.DrawLine(&pen, beggining, ending); //From x,y -> x,y to coords
+
+		DeleteObject(&pen);
+	}
+	VOID draw_hook(HDC hdc) {
+		Graphics graphics(hdc);
+		Pen      pen(color, 3);
+	
+		Point first(xpos - HOOK_SIZE / 2, ypos);
+		Point second(xpos + HOOK_SIZE / 2, ypos);
+
+		graphics.DrawLine(&pen, first, second); //From x,y -> x,y to coords
+
+		DeleteObject(&pen);
+	}
+
+	
+
 	/*VOID draw_circle()
 	{
 		Graphics graphics(hdc);
