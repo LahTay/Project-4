@@ -5,6 +5,12 @@ extern RECT window_size;
 
 constexpr INT dividing_line_top = 140;
 constexpr INT dividing_line_right = 450; // Screen length - dividing_line_right gives curren line position
+constexpr INT top_of_crane = dividing_line_top + 210;
+constexpr INT beggining_of_crane = 220;
+constexpr INT end_of_crane = 800;
+constexpr INT starting_x_of_hook = beggining_of_crane + 50;
+constexpr INT starting_y_of_hook = top_of_crane + 100;
+
 /*
 constexpr LONG current_x_of_0_point = (window_size.right - dividing_line_right) / 2;
 constexpr LONG current_y_of_0_point = (window_size.bottom) + dividing_line_top) / 2;
@@ -17,17 +23,27 @@ constexpr LONG current_right_line = 1903 - dividing_line_right;
 
 #define PI			   	 3.141592
 
-#define V_CONST			 1
-#define T_CONST			 2
-#define SC_CONST		 3
-#define ST_CONST		 4
-#define CH_CONST		 5
-#define CH_EDIT_CONST    6
-#define SC_EDIT_CONST    7
-#define V_EDIT_CONST     8
+#define UP_CONST			 1
+#define DWN_CONST			 2
+#define LFT_CONST		 3
+#define GRB_CONST		 4
+#define RGT_CONST		 5
+
+
+#define SQUARE				  100
+#define TRIANGLE			  101
+#define CIRCLE				  102
+#define HOOK				  103
+#define LINE				  104
+
+#define CENTER_DISTANCE				  5   //Odleg³oœæ od œrodka do roku obiektu (lub jego promieñ)
+#define HOOK_SIZE						  20  //Wielkoœæ ka¿dego z elementów
+
 
 #define CURRENT_X_OF_0_POINT  ((window_size.right - dividing_line_right) / 2)
 #define CURRENT_Y_OF_0_POINT  ((window_size.bottom + dividing_line_top) / 2)
 #define CURRENT_Z_OF_0_POINT  (((window_size.bottom + dividing_line_top) / 2 + dividing_line_top) / 2)
 #define CURRENT_T_OF_0_POINT  (window_size.right - 400)
 #define CURRENT_RIGHT_LINE    (window_size.right - dividing_line_right)
+
+#define GROUND				  (window_size.bottom - 200)
