@@ -1,4 +1,5 @@
-﻿#include "Header.h"
+﻿#include "pch.h"
+#include "Header.h"
 #include "Globals.h"
 #include "element.cpp"
 
@@ -106,7 +107,8 @@ VOID make_buttons(HWND hwnd_main, button& btn, input& inpt) {
 
 void generate_starting_condition(std::vector<std::pair<int, int>> &pos_array, std::vector<element> &elements)
 {
-		elements.push_back(element(starting_x_of_hook, starting_y_of_hook, 1, SQUARE, pos_array));
+	for(int i=0;i<5;i++)
+		elements.push_back(element(starting_x_of_hook+100*i, starting_y_of_hook+100, 1, SQUARE, pos_array));
 	
 }
 void draw_all(HDC hdc, std::vector<element> elements, element hook)
@@ -203,12 +205,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	static std::vector<std::pair<int, int>> pos_array;
 	static std::vector<element> elements;
-	static element hook(starting_x_of_hook, starting_y_of_hook, 1, HOOK, pos_array);
+	static element hook(starting_x_of_hook, starting_y_of_hook, 0, HOOK, pos_array);
 	
 
 	RECT drawing_size = { 0, dividing_line_top, window_size.right, window_size.bottom };
-	bool taken = FALSE;
-	element* pom=&hook;
+	bool taken = false;
+	static element* pom=&hook;
 
 	bool start = true;
 	switch (uMsg)
@@ -233,7 +235,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (draw_graph) {
 			FillRect(hdc, &drawing_size, static_cast<HBRUSH>(GetStockObject(WHITE_BRUSH)));
 			draw_crane(hdc);
-			//draw_all(hdc,elements,hook);
+			draw_all(hdc,elements,hook);
 			hook.draw(hdc);
 			
 			
@@ -247,37 +249,55 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (wParam) {
 		case UP_CONST:
-			hook.change_position(0, -10, pos_array);
+			hook.change_position(0, -5, pos_array);
 			
 			if (taken) 
-				 pom->change_position(0, -1, pos_array); 
+				 pom->change_position(0, -5, pos_array); 
 			draw_graph = true;
 			InvalidateRect(hwnd, &window_size, FALSE);
 			return 0;
 
 		case DWN_CONST:
-			hook.change_position(0, 10, pos_array);
+			hook.change_position(0, 5, pos_array);
 			
 			if (taken) 
-				pom->change_position(0, 1, pos_array); 
+				pom->change_position(0, 5, pos_array); 
 			draw_graph = true;
 			InvalidateRect(hwnd, &window_size, FALSE);
 			return 0;
 		case RGT_CONST:
-			hook.change_position(10, 0, pos_array);
+			hook.change_position(5, 0, pos_array);
 			
-			if (taken) 
-				pom->change_position(1, 0, pos_array);
+			if (pom->check_weight() != hook.check_weight()) 
+				pom->change_position(5, 0, pos_array);
 			draw_graph = true;
 			InvalidateRect(hwnd, &window_size, FALSE);
+			return 0;
 		case GRB_CONST:
-
+			if (!taken)
+			{
+				int j = 0;
+				for (std::vector<element>::iterator i = elements.begin(); i < elements.end(); i++)
+				{
+					j++;
+					if (i->check_x() >= (pos_array[0].first - CENTER_DISTANCE) && i->check_x() <= (pos_array[0].first + CENTER_DISTANCE) && i->check_y() >= (pos_array[0].second - CENTER_DISTANCE) && i->check_y() <= (pos_array[0].second + CENTER_DISTANCE))
+					{
+						pom = &*i;
+						taken = true;
+					}
+				}
+			}
+			else
+			{
+				pom = &hook;
+				taken = false;
+			}
 			return 0;
 		case LFT_CONST:
-			hook.change_position(-10, 0, pos_array);
+			hook.change_position(-5, 0, pos_array);
 			
 			if (taken)
-				pom->change_position(-1, 0, pos_array);
+				pom->change_position(-5, 0, pos_array);
 			draw_graph = true;
 			InvalidateRect(hwnd, &window_size, FALSE);
 			return 0;

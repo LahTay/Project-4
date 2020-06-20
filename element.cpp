@@ -14,18 +14,11 @@ public:
 		type = typ;
 		position.push_back(std::make_pair(x, y));
 }
-	element(int x, int y, int mass, std::vector<std::pair<int, int>> &position) {
-		xpos = x;
-		ypos = y;
-		weight = mass;
-		type = SQUARE;
-		position.push_back(std::make_pair(x, y));
-	}
 	void change_position(int dx, int dy, std::vector<std::pair<int, int>> &position) {//ten vector to pierwsze co mi przysz³o do g³owy w celu sprawdzania czy coœ znajduje siê na drodze obiektu
 		bool obstacle = false;
 		if (!((xpos+dx-CENTER_DISTANCE)<0||(ypos+dx-CENTER_DISTANCE)<dividing_line_top||(xpos+dx+CENTER_DISTANCE)>window_size.right||(ypos+dx+CENTER_DISTANCE)>window_size.bottom)) {
 			if (type == SQUARE) {
-				for (std::vector<std::pair<int, int>>::iterator i = position.begin(); i < position.end(); i++) {
+				for (std::vector<std::pair<int, int>>::iterator i = (position.begin()+1); i < position.end(); i++) {
 					if (!(((i->first > (xpos + dx + CENTER_DISTANCE)) || (i->first < (xpos + dx - CENTER_DISTANCE))) && ((i->second > (ypos + dy + CENTER_DISTANCE)) || (i->second < (ypos + dy - CENTER_DISTANCE)))))
 					{
 						if (i->first != xpos || i->second != ypos)
@@ -35,9 +28,9 @@ public:
 					}
 				}
 			}
-			if (!obstacle)
+			if (!obstacle && type==SQUARE)
 			{
-				for (std::vector<std::pair<int, int>>::iterator i = position.begin(); i < position.end(); i++) {
+				for (std::vector<std::pair<int, int>>::iterator i = position.begin()+1; i < position.end(); i++) {
 					if (i->first == xpos && i->second == ypos)
 					{
 						i->first = xpos + dx;
@@ -46,6 +39,14 @@ public:
 						ypos += dy;
 					}
 				}
+			}
+			else if (type==HOOK)
+			{
+				std::vector<std::pair<int, int>>::iterator i = position.begin();
+				i->first = xpos + dx;
+				i->second = ypos + dy;
+				xpos += dx;
+				ypos += dy;
 			}
 		}
 	}
@@ -83,8 +84,14 @@ public:
 		Point temp(xpos, ypos);
 			return temp;
 	}
-
-	
+	int check_x()
+	{
+		return xpos;
+	}
+	int check_y()
+	{
+		return ypos;
+	}
 private:
 	int weight;
 	int xpos;
