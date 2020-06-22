@@ -108,7 +108,7 @@ VOID make_buttons(HWND hwnd_main, button& btn, input& inpt) {
 void generate_starting_condition(std::vector<std::pair<int, int>> &pos_array, std::vector<element> &elements)
 {
 	for(int i=0;i<5;i++)
-		elements.push_back(element(starting_x_of_hook+100*i, starting_y_of_hook+100, 1, SQUARE, pos_array));
+		elements.push_back(element(starting_x_of_hook+100*i, starting_y_of_hook+100, generate_random_number(1,11)*100, SQUARE, pos_array));
 	
 }
 void draw_all(HDC hdc, std::vector<element> elements, element hook)
@@ -209,7 +209,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	
 
 	RECT drawing_size = { 0, dividing_line_top, window_size.right, window_size.bottom };
-	bool taken = false;
 	static element* pom=&hook;
 
 	bool start = true;
@@ -276,19 +275,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case GRB_CONST:
 			if (!taken)
 			{
-				int j = 0;
 				for (std::vector<element>::iterator i = elements.begin(); i < elements.end(); i++)
 				{
-					j++;
 					if (i->check_x() >= (pos_array[0].first - CENTER_DISTANCE) && i->check_x() <= (pos_array[0].first + CENTER_DISTANCE) && i->check_y() >= (pos_array[0].second - CENTER_DISTANCE) && i->check_y() <= (pos_array[0].second + CENTER_DISTANCE))
 					{
-						pom = &*i;
-						taken = true;
+						if (i->check_lift(lift))
+						{
+							pom = &*i;
+							taken = true;
+						}
 					}
 				}
 			}
 			else
 			{
+				pom->change_position(0, 2000, pos_array);
 				pom = &hook;
 				taken = false;
 			}

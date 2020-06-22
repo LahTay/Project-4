@@ -13,17 +13,33 @@ public:
 		weight = mass;
 		type = typ;
 		position.push_back(std::make_pair(x, y));
+		falling = false;
 }
 	void change_position(int dx, int dy, std::vector<std::pair<int, int>> &position) {//ten vector to pierwsze co mi przysz³o do g³owy w celu sprawdzania czy coœ znajduje siê na drodze obiektu
 		bool obstacle = false;
-		if (!((xpos+dx-CENTER_DISTANCE)<0||(ypos+dx-CENTER_DISTANCE)<dividing_line_top||(xpos+dx+CENTER_DISTANCE)>window_size.right||(ypos+dx+CENTER_DISTANCE)>window_size.bottom)) {
+		
+		if (!((xpos+dx-2*CENTER_DISTANCE)<beggining_of_crane||(ypos+dy-2*CENTER_DISTANCE)<top_of_crane||(xpos+dx+2*CENTER_DISTANCE)>end_of_crane||(ypos+dy+2*CENTER_DISTANCE)>GROUND)) {
 			if (type == SQUARE) {
-				for (std::vector<std::pair<int, int>>::iterator i = (position.begin()+1); i < position.end(); i++) {
-					if (!(((i->first > (xpos + dx + CENTER_DISTANCE)) || (i->first < (xpos + dx - CENTER_DISTANCE))) && ((i->second > (ypos + dy + CENTER_DISTANCE)) || (i->second < (ypos + dy - CENTER_DISTANCE)))))
+				for (std::vector<std::pair<int, int>>::iterator i = (position.begin() + 1); i < position.end(); i++) {
+					if (dy == 0)
 					{
-						if (i->first != xpos || i->second != ypos)
+						if ((ypos < (i->second - 2 * CENTER_DISTANCE + 1)) && (ypos> i->second + 2 * CENTER_DISTANCE - 1))
 						{
-							obstacle = true;
+							if((xpos+dx>i->first+2*CENTER_DISTANCE)|| (xpos + dx < i->first - 2 * CENTER_DISTANCE))
+							{ }
+							else obstacle = true;
+
+						}
+					}
+					else
+					{
+						if ((xpos < (i->first - 2 * CENTER_DISTANCE + 1)) && (xpos > i->first + 2 * CENTER_DISTANCE - 1))
+						{
+							if ((ypos + dy > i->second + 2 * CENTER_DISTANCE) || (ypos + dy < i->second - 2 * CENTER_DISTANCE))
+							{
+							}
+							else obstacle = true;
+
 						}
 					}
 				}
@@ -48,6 +64,15 @@ public:
 				xpos += dx;
 				ypos += dy;
 			}
+		}
+		else if(type==SQUARE) obstacle = true;
+
+		if (obstacle && !falling)
+		{
+			falling = true;
+			taken = false;
+			for (int j = 0; j < 100; j++)change_position(0, 5, position);
+			falling = false;
 		}
 	}
 	bool check_lift(int max)
@@ -96,7 +121,8 @@ private:
 	int weight;
 	int xpos;
 	int ypos;
-	int type; //obecnie raczej nieu¿ywane mo¿na przechowaæ kszta³t obiektu 1 = kwadrat i tak dalej, zawsze mo¿e siê przydaæ, po zmianie typ 1 element typ 2 hak
+	int type;//obecnie raczej nieu¿ywane mo¿na przechowaæ kszta³t obiektu 1 = kwadrat i tak dalej, zawsze mo¿e siê przydaæ, po zmianie typ 1 element typ 2 hak
+	bool falling;
 	Point starting_point = { xpos, ypos };
 	Color color{ 255,255,0,0 };
 	
@@ -104,9 +130,8 @@ private:
 	{
 		Graphics graphics(hdc); //Klasa zawieraj¹ca metody do rysowania
 		Pen      pen(color, 3); //Klasa zwieraj¹ca atrybuty lini takie jak: Opacity, Red, Green, Blue
-
 		pen.SetDashStyle(DashStyleSolid);
-		graphics.DrawRectangle(&pen, (xpos - CENTER_DISTANCE), (ypos - CENTER_DISTANCE), HOOK_SIZE, HOOK_SIZE);
+		graphics.DrawRectangle(&pen, (xpos - CENTER_DISTANCE), (ypos - CENTER_DISTANCE), 2*CENTER_DISTANCE, 2*CENTER_DISTANCE);
 		DeleteObject(&pen);
 	}
 	VOID draw_triangle(HDC hdc)
@@ -145,8 +170,6 @@ private:
 
 		DeleteObject(&pen);
 	}
-
-	
 
 	/*VOID draw_circle()
 	{
