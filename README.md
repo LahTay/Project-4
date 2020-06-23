@@ -24,5 +24,5 @@ Additionally the elements can be stacked, and removed only starting from the top
 
 ## Authors
 
-Bartosz Szczepanek - 180357
-Tymoteusz Skrzyński - 180281
+* Bartosz Szczepanek - 180357
+* Tymoteusz Skrzyński - 180281
