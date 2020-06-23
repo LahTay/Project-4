@@ -1,4 +1,11 @@
-﻿#include "pch.h"
+﻿//CHANGE LOG
+// Zmiana zmiennych na static w WndProc
+
+
+
+
+
+
 #include "Header.h"
 #include "Globals.h"
 #include "element.cpp"
@@ -48,6 +55,7 @@ VOID draw_text(HDC hdc, const int x_begin, const int x_end, const int y_begin, c
 	DrawText(hdc, (text), -1, &rect, DT_WORDBREAK | DT_TOP); // -1 to weźmie długość max zmiennej text
 	SetTextColor(hdc, RGB(0, 0, 0));
 }
+
 
 
 VOID create_button(HWND hwnd_main, HWND& btn, const int x, const int y, const int width, const int height, LPCTSTR btn_text, int macro_value) {
@@ -107,8 +115,10 @@ VOID make_buttons(HWND hwnd_main, button& btn, input& inpt) {
 
 void generate_starting_condition(std::vector<std::pair<int, int>> &pos_array, std::vector<element> &elements)
 {
-	for(int i=0;i<5;i++)
-		elements.push_back(element(starting_x_of_hook+100*i, starting_y_of_hook+100, generate_random_number(1,11)*100, SQUARE, pos_array));
+		//elements.push_back(element(starting_x_of_hook, starting_y_of_hook, 1, SQUARE, pos_array));
+	elements.push_back(element(beggining_of_crane + 50, GROUND - CENTER_DISTANCE, 1, SQUARE, pos_array));
+	elements.push_back(element(beggining_of_crane + 100, GROUND - CENTER_DISTANCE, 1, SQUARE, pos_array));
+	elements.push_back(element(beggining_of_crane + 150, GROUND - CENTER_DISTANCE, 1, SQUARE, pos_array));
 	
 }
 void draw_all(HDC hdc, std::vector<element> elements, element hook)
@@ -136,6 +146,9 @@ VOID draw_crane(HDC hdc) {
 	draw_line(hdc, beggining_of_crane, end_of_crane, top_of_crane - 10, top_of_crane - 10, DashStyleSolid, { 255, 0 , 0, 0 }, 1); //Dlugość żurawia
 	draw_line(hdc, beggining_of_crane, end_of_crane, top_of_crane, top_of_crane, DashStyleSolid, { 255, 0, 0, 0 }, 1);
 	draw_line(hdc, end_of_crane - 20, end_of_crane + 1, dividing_line_top + 205, dividing_line_top + 205, DashStyleSolid, { 255, 0, 0, 0 }, 10);
+
+	draw_text(hdc, 200, 300, 300, 350, L"Poruszanie sie -> strzalki", RGB(0, 0, 0));
+	draw_text(hdc, 400, 520, 300, 350, L"Zlapanie obiektu -> spacja", RGB(0, 0, 0));
 }
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
@@ -205,21 +218,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	static std::vector<std::pair<int, int>> pos_array;
 	static std::vector<element> elements;
-	static element hook(starting_x_of_hook, starting_y_of_hook, 0, HOOK, pos_array);
+
+	static element hook(starting_x_of_hook, starting_y_of_hook, 1, HOOK, pos_array);
 	
-
-	RECT drawing_size = { 0, dividing_line_top, window_size.right, window_size.bottom };
-	static element* pom=&hook;
-
-	bool start = true;
+	RECT drawing_size = { beggining_of_crane + 1, top_of_crane + 1, end_of_crane + 20, GROUND };
+	
+	static element* pom = &hook;
+	static bool taken = FALSE;
+	static bool start = true;
 	switch (uMsg)
 	{
 
 	case WM_CREATE:
 
 
-		make_buttons(hwnd, btn, inpt);
-		generate_starting_condition(pos_array, elements);
+		//make_buttons(hwnd, btn, inpt);
+		
 		
 		return 0;
 	case WM_PAINT:
@@ -227,6 +241,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		hdc = BeginPaint(hwnd, &ps);
 
 		if (start) {
+			generate_starting_condition(pos_array, elements);
 			draw_crane(hdc);
 			draw_main(hdc, ps);
 			start = false;
@@ -239,72 +254,112 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			
 			
 		}
-
+		
 		EndPaint(hwnd, &ps);
 		draw_graph = false;
 		return 0;
 	}
 
-	case WM_COMMAND:
+	case WM_KEYDOWN:
+	{
+		
+		Point xy = hook.check_pos();
+		int x = xy.X;
+		int y = xy.Y;
 		switch (wParam) {
-		case UP_CONST:
-			hook.change_position(0, -5, pos_array);
-			
-			if (taken) 
-				 pom->change_position(0, -5, pos_array); 
-			draw_graph = true;
-			InvalidateRect(hwnd, &window_size, FALSE);
-			return 0;
+		case VK_UP:
+			if (y - hook_size / 2 > top_of_crane) {
+				if (taken) 
+					pom->change_position(0, -changing_range, pos_array);
 
-		case DWN_CONST:
-			hook.change_position(0, 5, pos_array);
+				if (!pom->was_made_obstacle())
+					hook.change_position(0, -changing_range, pos_array);
+
+					draw_graph = true;
+				InvalidateRect(hwnd, &window_size, FALSE);
+			}
+			else {
+				hook.change_position(0, -(y - top_of_crane - 1), pos_array);
+				draw_graph = true;
+				InvalidateRect(hwnd, &window_size, FALSE);
+			}
+
 			
-			if (taken) 
-				pom->change_position(0, 5, pos_array); 
-			draw_graph = true;
-			InvalidateRect(hwnd, &window_size, FALSE);
 			return 0;
-		case RGT_CONST:
-			hook.change_position(5, 0, pos_array);
+		case VK_DOWN:
+			if (y + hook_size / 2 < GROUND) {
+				
+				if (taken)
+					pom->change_position(0, changing_range, pos_array);
+				if (!pom->was_made_obstacle())
+					hook.change_position(0, changing_range, pos_array);
+					draw_graph = true;
+				InvalidateRect(hwnd, &window_size, FALSE);
+			}
+			else {
+				hook.change_position(0, (GROUND - y - 1), pos_array);
+				draw_graph = true;
+				InvalidateRect(hwnd, &window_size, FALSE);
+			}
+			return 0;
+		case VK_RIGHT:
+			if (x + hook_size / 2 < end_of_crane) {
+				
+				if (taken)
+					pom->change_position(changing_range, 0, pos_array);
+				if (!pom->was_made_obstacle())
+					hook.change_position(changing_range, 0, pos_array);
+					draw_graph = true;
+				InvalidateRect(hwnd, &window_size, FALSE);
+				
+			}
+			else {
+				hook.change_position(end_of_crane - x - 1, 0, pos_array);
+				draw_graph = true;
+				InvalidateRect(hwnd, &window_size, FALSE);
+			}
 			
-			if (pom->check_weight() != hook.check_weight()) 
-				pom->change_position(5, 0, pos_array);
-			draw_graph = true;
-			InvalidateRect(hwnd, &window_size, FALSE);
 			return 0;
-		case GRB_CONST:
+		case VK_LEFT:
+			if (x - hook_size / 2 > beggining_of_crane) {
+				
+				if (taken)
+					pom->change_position(-changing_range, 0, pos_array);
+				if (!pom->was_made_obstacle())
+					hook.change_position(-changing_range, 0, pos_array);
+					draw_graph = true;
+				InvalidateRect(hwnd, &window_size, FALSE);
+			}
+			else {
+				hook.change_position(-(x - beggining_of_crane - hook_size / 2), 0, pos_array);
+				draw_graph = true;
+				InvalidateRect(hwnd, &window_size, FALSE);	
+			}
+			return 0;
+		case VK_SPACE:
 			if (!taken)
 			{
+				int j = 0;
 				for (std::vector<element>::iterator i = elements.begin(); i < elements.end(); i++)
 				{
-					if (i->check_x() >= (pos_array[0].first - CENTER_DISTANCE) && i->check_x() <= (pos_array[0].first + CENTER_DISTANCE) && i->check_y() >= (pos_array[0].second - CENTER_DISTANCE) && i->check_y() <= (pos_array[0].second + CENTER_DISTANCE))
+					Point element_coords = i->check_pos();
+					j++;
+					if (element_coords.X >= (x - center_distance) && element_coords.X <= (x + center_distance) && element_coords.Y >= (y - center_distance) && element_coords.Y <= (y + center_distance))
 					{
-						if (i->check_lift(lift))
-						{
-							pom = &*i;
-							taken = true;
-						}
+						pom = &*i;
+						taken = true;
 					}
 				}
 			}
 			else
 			{
-				pom->change_position(0, 2000, pos_array);
 				pom = &hook;
 				taken = false;
 			}
 			return 0;
-		case LFT_CONST:
-			hook.change_position(-5, 0, pos_array);
-			
-			if (taken)
-				pom->change_position(-5, 0, pos_array);
-			draw_graph = true;
-			InvalidateRect(hwnd, &window_size, FALSE);
-			return 0;
-
-
 		}
+	}
+	case WM_COMMAND:
 		return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);

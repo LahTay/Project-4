@@ -13,20 +13,74 @@ public:
 		weight = mass;
 		type = typ;
 		position.push_back(std::make_pair(x, y));
-		falling = false;
 }
-	void change_position(int dx, int dy, std::vector<std::pair<int, int>> &position) {//ten vector to pierwsze co mi przysz³o do g³owy w celu sprawdzania czy coœ znajduje siê na drodze obiektu
+	
+
+
+	
+
+	void change_position(int dx, int dy, std::vector<std::pair<int, int>>& position) {//ten vector to pierwsze co mi przysz³o do g³owy w celu sprawdzania czy coœ znajduje siê na drodze obiektu
 		bool obstacle = false;
 		
-		if (!((xpos+dx-2*CENTER_DISTANCE)<beggining_of_crane||(ypos+dy-2*CENTER_DISTANCE)<top_of_crane||(xpos+dx+2*CENTER_DISTANCE)>end_of_crane||(ypos+dy+2*CENTER_DISTANCE)>GROUND)) {
-			if (type == SQUARE) {
+		if (type == HOOK) { //Sprawdza czy wszystkie coorynaty po zmianie bêd¹ w obszarze dzwigu
+				std::vector<std::pair<int, int>>::iterator it = position.begin(); // hook to pierwszy element position
+				it->first = xpos + dx; 
+				it->second = ypos + dy;
+				xpos += dx;
+				ypos += dy;
+				is_obstacle = false;
+			}
+
+		
+		else if (xpos + dx - center_distance > beggining_of_crane and xpos + dx + center_distance < end_of_crane and ypos + dy - center_distance > top_of_crane  and ypos + dy + center_distance <= GROUND ) {  // Czy jest w obszarze dzwigu
+				for (std::vector<std::pair<int, int>>::iterator it = (position.begin() + 1); it < position.end(); it++) {   // PrzejdŸ przez wszystkie elementy
+					if (it->first == xpos and it->second == ypos) // Jeœli element ma te same koordynaty co przenoszony to jest on sam sob¹ i jest pomijany
+						continue;					
+					
+					
+					if (dx) {																																//Jesli w elemencie jest
+						if ((xpos + dx + center_distance > it->first - center_distance and xpos + dx + center_distance < it->first + center_distance or  // (prawa sciana LUB
+							xpos + dx - center_distance > it->first - center_distance and xpos + dx - center_distance < it->first + center_distance) and  // lewa sciana) I
+							(ypos + dy + center_distance >= it->second - center_distance and ypos + dy + center_distance <= it->second + center_distance or  // (dolna sciana LUB
+								ypos + dy - center_distance >= it->second - center_distance and ypos + dy - center_distance <= it->second + center_distance)) // gorna sciana)
+							obstacle = true;																										// To jest w elemencie
+					}
+					else
+						if ((xpos + dx + center_distance >= it->first - center_distance and xpos + dx + center_distance <= it->first + center_distance or  // (prawa sciana LUB
+							xpos + dx - center_distance >= it->first - center_distance and xpos + dx - center_distance <= it->first + center_distance) and  // lewa sciana) I
+							(ypos + dy + center_distance > it->second - center_distance and ypos + dy + center_distance < it->second + center_distance or  // (dolna sciana LUB
+								ypos + dy - center_distance > it->second - center_distance and ypos + dy - center_distance < it->second + center_distance)) // gorna sciana)
+							obstacle = true;
+
+					is_obstacle = true;
+					
+
+				
+				}
+				if (!obstacle) {
+					for (std::vector<std::pair<int, int>>::iterator it = position.begin() + 1; it < position.end(); it++) {
+						if (it->first == xpos and it->second == ypos) {
+							it->first = xpos + dx;
+							it->second = ypos + dy;
+							xpos += dx;
+							ypos += dy;
+							is_obstacle = false;
+						}
+					}
+				}
+			}
+		
+
+		
+			/*
 				for (std::vector<std::pair<int, int>>::iterator i = (position.begin() + 1); i < position.end(); i++) {
 					if (dy == 0)
 					{
-						if ((ypos < (i->second - 2 * CENTER_DISTANCE + 1)) && (ypos> i->second + 2 * CENTER_DISTANCE - 1))
+						if ((ypos < (i->second - 2 * CENTER_DISTANCE + 1)) && (ypos > i->second + 2 * CENTER_DISTANCE - 1))
 						{
-							if((xpos+dx>i->first+2*CENTER_DISTANCE)|| (xpos + dx < i->first - 2 * CENTER_DISTANCE))
-							{ }
+							if ((xpos + dx > i->first + 2 * CENTER_DISTANCE) || (xpos + dx < i->first - 2 * CENTER_DISTANCE))
+							{
+							}
 							else obstacle = true;
 
 						}
@@ -43,10 +97,10 @@ public:
 						}
 					}
 				}
-			}
-			if (!obstacle && type==SQUARE)
+			
+			if (!obstacle && type == SQUARE)
 			{
-				for (std::vector<std::pair<int, int>>::iterator i = position.begin()+1; i < position.end(); i++) {
+				for (std::vector<std::pair<int, int>>::iterator i = position.begin() + 1; i < position.end(); i++) {
 					if (i->first == xpos && i->second == ypos)
 					{
 						i->first = xpos + dx;
@@ -56,7 +110,7 @@ public:
 					}
 				}
 			}
-			else if (type==HOOK)
+			else if (type == HOOK)
 			{
 				std::vector<std::pair<int, int>>::iterator i = position.begin();
 				i->first = xpos + dx;
@@ -64,16 +118,7 @@ public:
 				xpos += dx;
 				ypos += dy;
 			}
-		}
-		else if(type==SQUARE) obstacle = true;
-
-		if (obstacle && !falling)
-		{
-			falling = true;
-			taken = false;
-			for (int j = 0; j < 100; j++)change_position(0, 5, position);
-			falling = false;
-		}
+		*/
 	}
 	bool check_lift(int max)
 	{
@@ -109,20 +154,18 @@ public:
 		Point temp(xpos, ypos);
 			return temp;
 	}
-	int check_x()
-	{
-		return xpos;
+	bool was_made_obstacle() {
+		return is_obstacle;
 	}
-	int check_y()
-	{
-		return ypos;
-	}
+
+	
 private:
 	int weight;
 	int xpos;
 	int ypos;
-	int type;//obecnie raczej nieu¿ywane mo¿na przechowaæ kszta³t obiektu 1 = kwadrat i tak dalej, zawsze mo¿e siê przydaæ, po zmianie typ 1 element typ 2 hak
-	bool falling;
+	int type; //obecnie raczej nieu¿ywane mo¿na przechowaæ kszta³t obiektu 1 = kwadrat i tak dalej, zawsze mo¿e siê przydaæ, po zmianie typ 1 element typ 2 hak
+	bool is_obstacle;
+
 	Point starting_point = { xpos, ypos };
 	Color color{ 255,255,0,0 };
 	
@@ -130,8 +173,9 @@ private:
 	{
 		Graphics graphics(hdc); //Klasa zawieraj¹ca metody do rysowania
 		Pen      pen(color, 3); //Klasa zwieraj¹ca atrybuty lini takie jak: Opacity, Red, Green, Blue
+
 		pen.SetDashStyle(DashStyleSolid);
-		graphics.DrawRectangle(&pen, (xpos - CENTER_DISTANCE), (ypos - CENTER_DISTANCE), 2*CENTER_DISTANCE, 2*CENTER_DISTANCE);
+		graphics.DrawRectangle(&pen, (xpos - CENTER_DISTANCE), (ypos - CENTER_DISTANCE), CENTER_DISTANCE * 2, CENTER_DISTANCE * 2);
 		DeleteObject(&pen);
 	}
 	VOID draw_triangle(HDC hdc)
@@ -170,15 +214,4 @@ private:
 
 		DeleteObject(&pen);
 	}
-
-	/*VOID draw_circle()
-	{
-		Graphics graphics(hdc);
-		Pen      pen(color, 3);
-
-		pen.SetDashStyle(dash_style);
-		graphics.DrawElipse(pen, xpos - 5, ypos - 5, 10, 10);
-		DeleteObject(&pen);
-	}
-	*/
 };

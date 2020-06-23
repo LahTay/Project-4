@@ -10,8 +10,12 @@ constexpr INT beggining_of_crane = 220;
 constexpr INT end_of_crane = 800;
 constexpr INT starting_x_of_hook = beggining_of_crane + 50;
 constexpr INT starting_y_of_hook = top_of_crane + 100;
-static bool taken = false;
+constexpr INT changing_range = 5;
+constexpr INT center_distance = 10;
+constexpr INT hook_size = 20;
 constexpr INT lift = 1000;
+
+
 /*
 constexpr LONG current_x_of_0_point = (window_size.right - dividing_line_right) / 2;
 constexpr LONG current_y_of_0_point = (window_size.bottom) + dividing_line_top) / 2;
@@ -37,8 +41,8 @@ constexpr LONG current_right_line = 1903 - dividing_line_right;
 #define HOOK				  103
 #define LINE				  104
 
-#define CENTER_DISTANCE				  10   //Odleg³oœæ od œrodka do krawêdzi obiektu (lub jego promieñ) 
-#define HOOK_SIZE						  20  //Wielkoœæ haka
+#define CENTER_DISTANCE				  10   //Odleg³oœæ od œrodka do rogu obiektu (lub jego promieñ)
+#define HOOK_SIZE						  20  //Wielkoœæ ka¿dego z elementów
 
 
 #define CURRENT_X_OF_0_POINT  ((window_size.right - dividing_line_right) / 2)
