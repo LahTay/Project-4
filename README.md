@@ -8,8 +8,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-Installed Visual Studio 2017
-Working in a Windows 7 and later environment
+* Installed Visual Studio 2017 
+* Working in a Windows 7 and later environment
 
 ## Program description
 
