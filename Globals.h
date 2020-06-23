@@ -28,11 +28,10 @@ constexpr LONG current_right_line = 1903 - dividing_line_right;
 
 #define PI			   	 3.141592
 
-#define UP_CONST			 1
-#define DWN_CONST			 2
-#define LFT_CONST		 3
-#define GRB_CONST		 4
-#define RGT_CONST		 5
+#define CHANGE_WEIGHT_CONST			 1
+#define CHANGE_WEIGHT_EDIT_CONST	 2
+#define MAX_WEIGHT_CONST			 3
+#define MAX_WEIGHT_EDIT_CONST		 4
 
 
 #define SQUARE				  100

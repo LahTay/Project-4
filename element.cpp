@@ -2,7 +2,7 @@
 #include "Globals.h"
 #include "Header.h"
 using namespace Gdiplus;
-//z racji ¿e tylko podpunkt 4 to niepotrzebne s¹ inne kszta³ty
+
 class element
 {
 public:
@@ -13,11 +13,9 @@ public:
 		weight = mass;
 		type = typ;
 		position.push_back(std::make_pair(x, y));
-}
-	
-
-
-	
+		is_obstacle = false;
+		cant_move = false;
+	}
 
 	void change_position(int dx, int dy, std::vector<std::pair<int, int>>& position) {//ten vector to pierwsze co mi przysz³o do g³owy w celu sprawdzania czy coœ znajduje siê na drodze obiektu
 		bool obstacle = false;
@@ -69,73 +67,63 @@ public:
 					}
 				}
 			}
-		
-
-		
-			/*
-				for (std::vector<std::pair<int, int>>::iterator i = (position.begin() + 1); i < position.end(); i++) {
-					if (dy == 0)
-					{
-						if ((ypos < (i->second - 2 * CENTER_DISTANCE + 1)) && (ypos > i->second + 2 * CENTER_DISTANCE - 1))
-						{
-							if ((xpos + dx > i->first + 2 * CENTER_DISTANCE) || (xpos + dx < i->first - 2 * CENTER_DISTANCE))
-							{
-							}
-							else obstacle = true;
-
-						}
-					}
-					else
-					{
-						if ((xpos < (i->first - 2 * CENTER_DISTANCE + 1)) && (xpos > i->first + 2 * CENTER_DISTANCE - 1))
-						{
-							if ((ypos + dy > i->second + 2 * CENTER_DISTANCE) || (ypos + dy < i->second - 2 * CENTER_DISTANCE))
-							{
-							}
-							else obstacle = true;
-
-						}
-					}
-				}
-			
-			if (!obstacle && type == SQUARE)
-			{
-				for (std::vector<std::pair<int, int>>::iterator i = position.begin() + 1; i < position.end(); i++) {
-					if (i->first == xpos && i->second == ypos)
-					{
-						i->first = xpos + dx;
-						i->second = ypos + dy;
-						xpos += dx;
-						ypos += dy;
-					}
+		else if (dx > 0 and !dy) {
+			for (std::vector<std::pair<int, int>>::iterator it = position.begin() + 1; it < position.end(); it++) {
+				if (it->first == xpos and it->second == ypos) {
+					it->first = end_of_crane - center_distance - 1;
+					xpos = end_of_crane - center_distance - 1;
+					is_obstacle = true;
+					
 				}
 			}
-			else if (type == HOOK)
-			{
-				std::vector<std::pair<int, int>>::iterator i = position.begin();
-				i->first = xpos + dx;
-				i->second = ypos + dy;
-				xpos += dx;
-				ypos += dy;
+		}
+
+		else if (dx < 0 and !dy) {
+			for (std::vector<std::pair<int, int>>::iterator it = position.begin() + 1; it < position.end(); it++) {
+				if (it->first == xpos and it->second == ypos) {
+					it->first = beggining_of_crane + center_distance + 1;
+					xpos = beggining_of_crane + center_distance + 1;
+					is_obstacle = true;
+
+				}
 			}
-		*/
+		}
+
+		else if (!dx  and dy > 0 ) {
+			for (std::vector<std::pair<int, int>>::iterator it = position.begin() + 1; it < position.end(); it++) {
+				if (it->first == xpos and it->second == ypos) {
+					it->second = GROUND - center_distance - 1;
+					ypos = GROUND - center_distance - 1;
+					is_obstacle = true;
+
+				}
+			}
+		}
+
+		else if (!dx and dy < 0) {
+			for (std::vector<std::pair<int, int>>::iterator it = position.begin() + 1; it < position.end(); it++) {
+				if (it->first == xpos and it->second == ypos) {
+					it->second = top_of_crane + center_distance + 1;
+					ypos = top_of_crane + center_distance + 1;
+					is_obstacle = true;
+
+				}
+			}
+		}
+
 	}
+
 	bool check_lift(int max)
 	{
 		if (weight > max)
 			return false;
-		else return true;
+	    return true;
 	}
 	void draw(HDC hdc)
 	{
 		switch (type) { //Zamiast wielu if else
 		case SQUARE:
 			draw_rect(hdc);
-			break;
-		case TRIANGLE:
-			draw_triangle(hdc);
-			break;
-		case CIRCLE:
 			break;
 		case HOOK:
 			draw_line(hdc);
@@ -154,8 +142,20 @@ public:
 		Point temp(xpos, ypos);
 			return temp;
 	}
+	int check_x() {
+		return xpos;
+	}
+	int check_y() {
+		return ypos;
+	}
 	bool was_made_obstacle() {
 		return is_obstacle;
+	}
+	bool can_move() {
+		return cant_move;
+	}
+	int check_type() {
+		return type;
 	}
 
 	
@@ -163,8 +163,9 @@ private:
 	int weight;
 	int xpos;
 	int ypos;
-	int type; //obecnie raczej nieu¿ywane mo¿na przechowaæ kszta³t obiektu 1 = kwadrat i tak dalej, zawsze mo¿e siê przydaæ, po zmianie typ 1 element typ 2 hak
+	int type;
 	bool is_obstacle;
+	bool cant_move;
 
 	Point starting_point = { xpos, ypos };
 	Color color{ 255,255,0,0 };
@@ -178,20 +179,7 @@ private:
 		graphics.DrawRectangle(&pen, (xpos - CENTER_DISTANCE), (ypos - CENTER_DISTANCE), CENTER_DISTANCE * 2, CENTER_DISTANCE * 2);
 		DeleteObject(&pen);
 	}
-	VOID draw_triangle(HDC hdc)
-	{
-		Graphics graphics(hdc);
-		Pen      pen(color, 3);
-
-		Point p1(xpos, ypos - CENTER_DISTANCE) ;
-		Point p2(xpos - CENTER_DISTANCE, ypos - CENTER_DISTANCE) ;
-		Point p3(xpos + CENTER_DISTANCE, ypos - CENTER_DISTANCE) ;
-		Point pointarray[3] = { p1,p2,p3 };
-		
-		pen.SetDashStyle(DashStyleSolid);
-		graphics.DrawPolygon(&pen, pointarray,3);
-		DeleteObject(&pen);
-	}
+	
 	VOID draw_line(HDC hdc) {
 		Graphics graphics(hdc);
 		Pen      pen(color, 3);

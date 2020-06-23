@@ -13,25 +13,6 @@
 
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
-typedef struct button_struct
-{
-	HWND velocity_btn;
-	HWND scale_btn;
-	HWND time_btn;
-	HWND starting_btn;
-	HWND samples_throw_btn;
-}button;
-
-typedef struct input_struct
-{
-	HWND velocity_edit;
-	HWND scale_edit;
-	HWND time_edit;
-	HWND samples_throw_edit;
-}input;
-
-button              btn;
-input               inpt;
 
 int generate_random_number(int min_value, int max_value) {
 	std::default_random_engine engine(std::chrono::system_clock::now().time_since_epoch().count());
@@ -94,31 +75,13 @@ VOID create_input(HWND hwnd_main, HWND& inpt, const int x, const int y, const in
 
 }
 
-VOID make_buttons(HWND hwnd_main, button& btn, input& inpt) {
-
-	create_button(hwnd_main, btn.velocity_btn, 10, 96, 150, 40, LPCTSTR(L"up"), UP_CONST);
-	//create_input(hwnd_main, inpt.velocity_edit, 10, 40, 150, 20, LPCTSTR(L"1"), V_EDIT_CONST);
-
-	create_button(hwnd_main, btn.time_btn, 250, 96, 150, 40, LPCTSTR(L"down"), DWN_CONST);
-	//create_input(hwnd_main, inpt.time_edit, 250, 40, 150, 20, LPCTSTR(L"0"), NULL);
-
-	create_button(hwnd_main, btn.scale_btn, 500, 96, 150, 40, LPCTSTR(L"left"), LFT_CONST);
-	//create_input(hwnd_main, inpt.scale_edit, 500, 40, 150, 20, LPCTSTR(L"1"), SC_EDIT_CONST);
-
-	create_button(hwnd_main, btn.starting_btn, 1000, 96, 150, 40, LPCTSTR(L"grab/release element"), GRB_CONST);
-
-	//create_input(hwnd_main, inpt.samples_throw_edit, 1000, 40, 150, 20, LPCTSTR(L"0"), CH_EDIT_CONST);
-	create_button(hwnd_main, btn.samples_throw_btn, 750, 96, 150, 40, LPCTSTR(L"right"), RGT_CONST);
-
-}
-
 
 void generate_starting_condition(std::vector<std::pair<int, int>> &pos_array, std::vector<element> &elements)
 {
 		//elements.push_back(element(starting_x_of_hook, starting_y_of_hook, 1, SQUARE, pos_array));
-	elements.push_back(element(beggining_of_crane + 50, GROUND - CENTER_DISTANCE, 1, SQUARE, pos_array));
-	elements.push_back(element(beggining_of_crane + 100, GROUND - CENTER_DISTANCE, 1, SQUARE, pos_array));
-	elements.push_back(element(beggining_of_crane + 150, GROUND - CENTER_DISTANCE, 1, SQUARE, pos_array));
+	elements.push_back(element(beggining_of_crane + 50, GROUND - CENTER_DISTANCE, 50, SQUARE, pos_array));
+	elements.push_back(element(beggining_of_crane + 100, GROUND - CENTER_DISTANCE, 100, SQUARE, pos_array));
+	elements.push_back(element(beggining_of_crane + 150, GROUND - CENTER_DISTANCE, 150, SQUARE, pos_array));
 	
 }
 void draw_all(HDC hdc, std::vector<element> elements, element hook)
@@ -149,6 +112,10 @@ VOID draw_crane(HDC hdc) {
 
 	draw_text(hdc, 200, 300, 300, 350, L"Poruszanie sie -> strzalki", RGB(0, 0, 0));
 	draw_text(hdc, 400, 520, 300, 350, L"Zlapanie obiektu -> spacja", RGB(0, 0, 0));
+	draw_text(hdc, beggining_of_crane + 40, beggining_of_crane + 60, GROUND + CENTER_DISTANCE, GROUND + CENTER_DISTANCE + 20, L"50", RGB( 255, 0, 0 ));
+	draw_text(hdc, beggining_of_crane + 90, beggining_of_crane + 120, GROUND + CENTER_DISTANCE, GROUND + CENTER_DISTANCE + 20, L"100", RGB(255, 0, 0));
+	draw_text(hdc, beggining_of_crane + 140, beggining_of_crane + 170, GROUND + CENTER_DISTANCE, GROUND + CENTER_DISTANCE + 20, L"150", RGB(255, 0, 0));
+	draw_text(hdc, beggining_of_crane - 80 , beggining_of_crane - 40, top_of_crane,top_of_crane + 50, L"Max waga: 100", RGB(255, 0, 0));
 }
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
@@ -212,6 +179,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hdc;
 
+	
+
 	bool draw_graph = true;
 	//Added so the program will draw corretly in every resolution
 	GetClientRect(hwnd, &window_size);
@@ -219,7 +188,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	static std::vector<std::pair<int, int>> pos_array;
 	static std::vector<element> elements;
 
-	static element hook(starting_x_of_hook, starting_y_of_hook, 1, HOOK, pos_array);
+	
+
+	static element hook(starting_x_of_hook, starting_y_of_hook, 100, HOOK, pos_array);
 	
 	RECT drawing_size = { beggining_of_crane + 1, top_of_crane + 1, end_of_crane + 20, GROUND };
 	
@@ -229,12 +200,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg)
 	{
 
-	case WM_CREATE:
-
-
-		//make_buttons(hwnd, btn, inpt);
-		
-		
+	case WM_CREATE:	
 		return 0;
 	case WM_PAINT:
 	{
@@ -279,9 +245,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				InvalidateRect(hwnd, &window_size, FALSE);
 			}
 			else {
-				hook.change_position(0, -(y - top_of_crane - 1), pos_array);
-				draw_graph = true;
-				InvalidateRect(hwnd, &window_size, FALSE);
+				if(pom->check_type() == hook.check_type())
+					hook.change_position(0, -(y - top_of_crane - 1), pos_array);
+				else if (pom->check_y() - changing_range - center_distance > top_of_crane) {
+					if (taken)
+						pom->change_position(0, -changing_range, pos_array);
+					hook.change_position(0, -(y - top_of_crane - 1), pos_array);
+				}
+					draw_graph = true;
+					InvalidateRect(hwnd, &window_size, FALSE);
+				
 			}
 
 			
@@ -297,15 +270,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				InvalidateRect(hwnd, &window_size, FALSE);
 			}
 			else {
-				hook.change_position(0, (GROUND - y - 1), pos_array);
-				draw_graph = true;
-				InvalidateRect(hwnd, &window_size, FALSE);
+				if (pom->check_type() == hook.check_type())
+					hook.change_position(0, (GROUND - y - 1), pos_array);
+				if (pom->check_y() + changing_range + center_distance < GROUND) {
+					if (taken)
+						pom->change_position(0, changing_range, pos_array);
+					hook.change_position(0, (GROUND - y - 1), pos_array);
+				}
+					draw_graph = true;
+					InvalidateRect(hwnd, &window_size, FALSE);
+				
 			}
 			return 0;
 		case VK_RIGHT:
 			if (x + hook_size / 2 < end_of_crane) {
 				
-				if (taken)
+				if (taken)	
 					pom->change_position(changing_range, 0, pos_array);
 				if (!pom->was_made_obstacle())
 					hook.change_position(changing_range, 0, pos_array);
@@ -314,15 +294,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				
 			}
 			else {
-				hook.change_position(end_of_crane - x - 1, 0, pos_array);
-				draw_graph = true;
-				InvalidateRect(hwnd, &window_size, FALSE);
+				if (pom->check_type() == hook.check_type())
+					hook.change_position(end_of_crane - x - 1, 0, pos_array);
+				if (pom->check_x() + changing_range + center_distance < end_of_crane) {
+					if (taken)
+						pom->change_position(changing_range, 0, pos_array);
+					hook.change_position(end_of_crane - x - 1, 0, pos_array);
+				}
+					draw_graph = true;
+					InvalidateRect(hwnd, &window_size, FALSE);
+				
 			}
 			
 			return 0;
 		case VK_LEFT:
 			if (x - hook_size / 2 > beggining_of_crane) {
-				
 				if (taken)
 					pom->change_position(-changing_range, 0, pos_array);
 				if (!pom->was_made_obstacle())
@@ -331,35 +317,47 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				InvalidateRect(hwnd, &window_size, FALSE);
 			}
 			else {
-				hook.change_position(-(x - beggining_of_crane - hook_size / 2), 0, pos_array);
-				draw_graph = true;
-				InvalidateRect(hwnd, &window_size, FALSE);	
+				if (pom->check_type() == hook.check_type())
+					hook.change_position(-(x - beggining_of_crane - hook_size / 2), 0, pos_array);
+				if (pom->check_x() - changing_range - center_distance > end_of_crane) {
+					if (taken)
+						pom->change_position(-changing_range, 0, pos_array);
+					hook.change_position(-(x - beggining_of_crane - hook_size / 2), 0, pos_array);
+					draw_graph = true;
+					InvalidateRect(hwnd, &window_size, FALSE);
+				}
 			}
 			return 0;
 		case VK_SPACE:
 			if (!taken)
 			{
 				int j = 0;
-				for (std::vector<element>::iterator i = elements.begin(); i < elements.end(); i++)
-				{
-					Point element_coords = i->check_pos();
-					j++;
-					if (element_coords.X >= (x - center_distance) && element_coords.X <= (x + center_distance) && element_coords.Y >= (y - center_distance) && element_coords.Y <= (y + center_distance))
+					for (std::vector<element>::iterator i = elements.begin(); i < elements.end(); i++)
 					{
-						pom = &*i;
-						taken = true;
+						Point element_coords = i->check_pos();
+						j++;
+						if (element_coords.X >= (x - center_distance) && element_coords.X <= (x + center_distance) && element_coords.Y >= (y - center_distance) && element_coords.Y <= (y + center_distance))
+						{
+							if (hook.check_weight() >= i->check_weight()) {
+								pom = &*i;
+								taken = true;
+							}
+						}
 					}
-				}
+				
 			}
 			else
 			{
 				pom = &hook;
 				taken = false;
 			}
+				
+			
 			return 0;
 		}
 	}
 	case WM_COMMAND:
+		
 		return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);
