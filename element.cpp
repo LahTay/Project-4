@@ -113,12 +113,6 @@ public:
 
 	}
 
-	bool check_lift(int max)
-	{
-		if (weight > max)
-			return false;
-	    return true;
-	}
 	void draw(HDC hdc)
 	{
 		switch (type) { //Zamiast wielu if else

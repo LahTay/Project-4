@@ -1,11 +1,4 @@
-﻿//CHANGE LOG
-// Zmiana zmiennych na static w WndProc
-
-
-
-
-
-
+﻿
 #include "Header.h"
 #include "Globals.h"
 #include "element.cpp"
@@ -13,12 +6,6 @@
 
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
-
-int generate_random_number(int min_value, int max_value) {
-	std::default_random_engine engine(std::chrono::system_clock::now().time_since_epoch().count());
-	std::uniform_int_distribution<int> r_distribution(min_value, max_value);
-	return r_distribution(engine);
-}
 VOID draw_line(HDC hdc, const int x_begin, const int x_end, const int y_begin, const int y_end, const DashStyle dash_style, Color color, REAL thicc)
 {
 	Graphics graphics(hdc); //Klasa zawierająca metody do rysowania
@@ -82,6 +69,10 @@ void generate_starting_condition(std::vector<std::pair<int, int>> &pos_array, st
 	elements.push_back(element(beggining_of_crane + 50, GROUND - CENTER_DISTANCE, 50, SQUARE, pos_array));
 	elements.push_back(element(beggining_of_crane + 100, GROUND - CENTER_DISTANCE, 100, SQUARE, pos_array));
 	elements.push_back(element(beggining_of_crane + 150, GROUND - CENTER_DISTANCE, 150, SQUARE, pos_array));
+	elements.push_back(element(beggining_of_crane + 200, GROUND - CENTER_DISTANCE, 75, SQUARE, pos_array));
+	elements.push_back(element(beggining_of_crane + 250, GROUND - CENTER_DISTANCE, 101, SQUARE, pos_array));
+	elements.push_back(element(beggining_of_crane + 300, GROUND - CENTER_DISTANCE, 90, SQUARE, pos_array));
+	elements.push_back(element(beggining_of_crane + 350, GROUND - CENTER_DISTANCE, 10, SQUARE, pos_array));
 	
 }
 void draw_all(HDC hdc, std::vector<element> elements, element hook)
@@ -112,10 +103,14 @@ VOID draw_crane(HDC hdc) {
 
 	draw_text(hdc, 200, 300, 300, 350, L"Poruszanie sie -> strzalki", RGB(0, 0, 0));
 	draw_text(hdc, 400, 520, 300, 350, L"Zlapanie obiektu -> spacja", RGB(0, 0, 0));
-	draw_text(hdc, beggining_of_crane + 40, beggining_of_crane + 60, GROUND + CENTER_DISTANCE, GROUND + CENTER_DISTANCE + 20, L"50", RGB( 255, 0, 0 ));
+	draw_text(hdc, beggining_of_crane + 40, beggining_of_crane + 60, GROUND + CENTER_DISTANCE, GROUND + CENTER_DISTANCE + 20, L"50", RGB(255, 0, 0));
 	draw_text(hdc, beggining_of_crane + 90, beggining_of_crane + 120, GROUND + CENTER_DISTANCE, GROUND + CENTER_DISTANCE + 20, L"100", RGB(255, 0, 0));
 	draw_text(hdc, beggining_of_crane + 140, beggining_of_crane + 170, GROUND + CENTER_DISTANCE, GROUND + CENTER_DISTANCE + 20, L"150", RGB(255, 0, 0));
-	draw_text(hdc, beggining_of_crane - 80 , beggining_of_crane - 40, top_of_crane,top_of_crane + 50, L"Max waga: 100", RGB(255, 0, 0));
+	draw_text(hdc, beggining_of_crane + 190, beggining_of_crane + 220, GROUND + CENTER_DISTANCE, GROUND + CENTER_DISTANCE + 20, L"75", RGB(255, 0, 0));
+	draw_text(hdc, beggining_of_crane + 240, beggining_of_crane + 270, GROUND + CENTER_DISTANCE, GROUND + CENTER_DISTANCE + 20, L"101", RGB(255, 0, 0));
+	draw_text(hdc, beggining_of_crane + 290, beggining_of_crane + 320, GROUND + CENTER_DISTANCE, GROUND + CENTER_DISTANCE + 20, L"90", RGB(255, 0, 0));
+	draw_text(hdc, beggining_of_crane + 340, beggining_of_crane + 370, GROUND + CENTER_DISTANCE, GROUND + CENTER_DISTANCE + 20, L"10", RGB(255, 0, 0));
+	draw_text(hdc, beggining_of_crane - 80, beggining_of_crane - 40, top_of_crane, top_of_crane + 50, L"Max waga: 100", RGB(255, 0, 0));
 }
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
@@ -348,8 +343,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			else
 			{
+				for (int i = 0; i < 1000; i++)
+					pom->change_position(0, 1, pos_array);
 				pom = &hook;
 				taken = false;
+				draw_graph = true;
+				InvalidateRect(hwnd, &window_size, FALSE);
 			}
 				
 			
